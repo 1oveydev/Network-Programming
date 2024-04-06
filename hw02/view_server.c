@@ -105,39 +105,34 @@ int main(int argc, char *argv[]){
     // 파일이 존재
     else {
         while(1){
-            if ( (read_len = read(fd, &send_packet.buf, sizeof(send_packet.buf))) < BUF_SIZE ) {
-                send_packet.cmd = FILE_END;
-                send_packet.buf_len = read_len;
-                total_tx_cnt += 1;
-                total_tx_bytes += read_len;
-
-                // 클라이언트로 패킷 전송
-                write(clnt_sock, &send_packet, sizeof(send_packet));
-                printf("[Tx] cmd : %3d, len : %3d, total_tx_cnt : %3d, total_tx_bytes : %3d\n", send_packet.cmd, read_len, total_tx_cnt, total_tx_bytes);
-
-                // FILE_END 를 제대로 받았는지?
-                read(clnt_sock, &recv_packet, sizeof(recv_packet));
-
-                if (recv_packet.cmd == FILE_END_ACK)
-                    printf("[Rx] cmd : %3d, FILE_END_ACK\n", recv_packet.cmd);
-                
-                else
-                    printf("Something Wrong...");
-            
-                break;
-            }
-            
-            else{
+            if ( (read_len = read(fd, &send_packet.buf, sizeof(send_packet.buf))) < BUF_SIZE )
+                send_packet.cmd = FILE_END; 
+            else
                 send_packet.cmd = FILE_RES;
-                send_packet.buf_len = read_len;
-                total_tx_cnt += 1;
-                total_tx_bytes += read_len;
+            
+            send_packet.buf_len = read_len;
+            total_tx_cnt += 1;
+            total_tx_bytes += read_len;
 
-                // 클라이언트로 패킷 전송
-                write(clnt_sock, &send_packet, sizeof(send_packet));
-                printf("[Tx] cmd : %3d, len : %3d, total_tx_cnt : %3d, total_tx_bytes : %3d\n", send_packet.cmd, read_len, total_tx_cnt, total_tx_bytes);
-            }
+            // 1초마다 클라이언트로 패킷 전송
+            // usleep(10000); 테스트용 마이크로초 단위  -> 정상 작동 확인
+            sleep(1);
+            write(clnt_sock, &send_packet, sizeof(send_packet));
+            printf("[Tx] cmd : %3d, len : %3d, total_tx_cnt : %3d, total_tx_bytes : %3d\n", send_packet.cmd, read_len, total_tx_cnt, total_tx_bytes);
 
+            // 클라이언트에서 서버로 보내온 패킷 읽기
+            read(clnt_sock, &recv_packet, sizeof(recv_packet));
+
+            // 여전히 요청 상태를 받음
+            if (recv_packet.cmd == FILE_REQ)
+                continue;
+            
+            // 파일의 끝을 확인했다는 신호를 받음
+            else if (recv_packet.cmd == FILE_END_ACK){
+                printf("[Rx] cmd : %3d, FILE_END_ACK\n", recv_packet.cmd);
+                close(fd); // 파일 닫기
+                break;
+            }   
         }
     }
 
