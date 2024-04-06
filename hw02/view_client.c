@@ -86,6 +86,7 @@ int main(int argc, char *argv[]){
                 total_rx_cnt += 1;
                 total_rx_bytes += recv_packet.buf_len;
                 printf("%s", recv_packet.buf);
+                write(sock, &send_packet, sizeof(send_packet));
             }
 
             else if (recv_packet.cmd == FILE_END){
