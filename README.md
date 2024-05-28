@@ -11,6 +11,6 @@ EECS0312-001 네트워크 프로그래밍
 
 [hw05] 24.05.10(금) fork() 및 sigaction() 함수를 이용한 다중 타이머 기능 구현
 
-[hw06] 24.05.17(금) Packet Forwarding Client 및 Server 구현
+[hw06] 24.05.17(금) Packet Forwarding Client 및 Server 구현
 
 [hw07] 24.05.24(금) Multicast 를 이용한 채팅 프로그램 구현
